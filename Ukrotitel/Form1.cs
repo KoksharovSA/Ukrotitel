@@ -27,27 +27,51 @@ namespace Ukrotitel
             {
                 string path = item;
                 string newpatch = new FileInfo(path).FullName.Substring(0, new FileInfo(path).FullName.Length - 4) + "_p" + new FileInfo(path).Extension;
-                using (StreamReader sr = new StreamReader(path, true))
+                using (StreamReader sr = new StreamReader(path, Encoding.Default))
                 {
                     string line;
-                    using (StreamWriter sw = new StreamWriter(newpatch, false))
+                    using (StreamWriter sw = new StreamWriter(newpatch, false, Encoding.Default))
                     {
+                        bool flag = false;
+                        string substr = "";
                         while ((line = sr.ReadLine()) != null)
                         {
-                            if (line.ToLower().Contains(textBox1.Text))
+                            if (line.ToLower().Contains(textBox1.Text.ToLower()))
                             {
-                                if (numericUpDown1.Value > line.Length)
-                                {
-                                    numericUpDown1.Value = line.Length;
+                                if (flag) 
+                                {                                    
+                                    substr = substr.Length <120 ? substr : substr.Substring(0, 18) + substr.Substring(substr.Length-102);
+                                    sw.WriteLine(substr);
+                                    substr = "";
                                 }
-                                double x = Convert.ToDouble(numericUpDown1.Value) / 2;
-                                line = line.Substring(0, Convert.ToInt16(Math.Ceiling(x))) + line.Substring(line.Length - Convert.ToInt16(Math.Floor(x)), Convert.ToInt16(Math.Floor(x)));
+                                flag = true;
+                                substr = line.Substring(0, line.Length);
                             }
-                            sw.WriteLine(line);
+                            else if (line!="" && line[0] == '-') 
+                            {
+                                substr = substr.Substring(0, substr.Length - 2);
+                                substr += line.Substring(4);
+                            }
+                            else
+                            {
+                                if (flag)
+                                {                                    
+                                    substr = substr.Length < 120 ? substr : substr.Substring(0, 18) + substr.Substring(substr.Length - 102);
+                                    sw.WriteLine(substr);
+                                    substr = "";
+                                    flag = false;
+                                }
+                                sw.WriteLine(line);
+                            }                            
                         }
                     }
                 }
             }            
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
